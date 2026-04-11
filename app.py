@@ -1,83 +1,54 @@
-import streamlit as st  # 画面を作るライブラリ
+import streamlit as st
 
 from calculator import MahjongScoreCalculator, MLeaguePointCalculator
 from models import HandInput, MLeagueScoreInput, WinnerType, WinType
 
 
-# ページ設定
-st.set_page_config(page_title="麻雀アプリ", layout="wide")
+st.set_page_config(page_title="Mリーグ麻雀点数計算アプリ", layout="wide")
 
-# タイトル
-st.title("麻雀点数計算アプリ")
+st.title("Mリーグ麻雀点数計算アプリ")
+st.caption("役の翻数を入力すると、場ゾロ2翻を自動加算してMリーグ寄りに計算します。")
 
-# タブ作成（画面切り替え）
-tab1, tab2 = st.tabs(["和了点", "Mリーグ"])
+tab1, tab2 = st.tabs(["和了点計算", "Mリーグ最終ポイント計算"])
 
 
-# ===== 和了点計算 =====
 with tab1:
-
     st.subheader("和了点計算")
 
-    # フォーム（まとめて入力）
-    with st.form("form"):
-
-        # 横に並べる
-        col1, col2 = st.columns(2)
+    with st.form("hand_score_form"):
+        col1, col2, col3 = st.columns(3)
 
         with col1:
-            fu = st.selectbox("符", [20, 30, 40, 50])
-            han = st.selectbox("翻", [1, 2, 3, 4, 5])
+            fu = st.selectbox("符", [20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 110], index=2)
+            han = st.selectbox("役の翻数（場ゾロ抜き）", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], index=1)
 
         with col2:
-            winner_type = st.radio("親/子", ["親", "子"])
-            win_type = st.radio("ロン/ツモ", ["ロン", "ツモ"])
+            winner_type = st.radio("親 / 子", [WinnerType.DEALER.value, WinnerType.NON_DEALER.value])
+            win_type = st.radio("ロン / ツモ", [WinType.RON.value, WinType.TSUMO.value])
 
-        # ボタン
-        submitted = st.form_submit_button("計算")
+        with col3:
+            honba = st.number_input("本場", min_value=0, max_value=20, value=0, step=1)
+            kyotaku = st.number_input("供託（本数）", min_value=0, max_value=20, value=0, step=1)
 
-    # ボタン押したら実行
-    if submitted:
-
-        # 入力データ作成
-        hand_input = HandInput(
-            fu=fu,
-            han=han,
-            winner_type=WinnerType(winner_type),
-            win_type=WinType(win_type),
-        )
-
-        # 計算
-        result = MahjongScoreCalculator.calculate_hand_score(hand_input)
-
-        # 表示
-        st.metric("基本点", result.base_points)
-        st.metric("結果", result.total_points)
-
-
-# ===== Mリーグ =====
-with tab2:
-
-    st.subheader("最終ポイント")
-
-    with st.form("score_form"):
-
-        # 4人入力
-        p1 = st.number_input("P1", value=25000)
-        p2 = st.number_input("P2", value=25000)
-        p3 = st.number_input("P3", value=25000)
-        p4 = st.number_input("P4", value=25000)
-
-        submitted = st.form_submit_button("計算")
+        submitted = st.form_submit_button("計算する")
 
     if submitted:
+        try:
+            hand_input = HandInput(
+                fu=fu,
+                han=han,
+                winner_type=WinnerType(winner_type),
+                win_type=WinType(win_type),
+                honba=honba,
+                kyotaku=kyotaku,
+                include_bazoro=True,
+            )
+            result = MahjongScoreCalculator.calculate_hand_score(hand_input)
 
-        scores = [p1, p2, p3, p4]
+            st.success("計算完了")
+            st.metric("基本点", f"{result.base_points}")
+            st.metric("和了点", result.total_points)
+            st.info(f"今回の計算では、役の翻数 {han}翻 に場ゾロ2翻を加えて計算しています。")
 
-        result = MLeaguePointCalculator.calculate(
-            MLeagueScoreInput(scores=scores)
-        )
-
-        # 表示
-        for i, p in enumerate(result.players):
-            st.write(f"P{i+1}: 順位 {p.rank} / {p.point}pt")
+        except Exception as e:
+            st.error(f"エラー: {e}")

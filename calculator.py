@@ -1,6 +1,5 @@
-import math  # 切り上げ計算などに使う
+import math
 
-# 型（データの形）をmodelsから読み込む
 from models import (
     HandInput,
     HandResult,
@@ -12,25 +11,43 @@ from models import (
 )
 
 
-# 麻雀の点数計算クラス
 class MahjongScoreCalculator:
+    """Mリーグ寄りの和了点計算クラス"""
 
-    # 100点単位に切り上げる関数
     @staticmethod
     def _round_up_to_100(value: int) -> int:
+        # 100点単位に切り上げる
         return int(math.ceil(value / 100.0) * 100)
 
-    # 基本点を計算する関数
+    @staticmethod
+    def _effective_han(hand: HandInput) -> int:
+        """
+        実際の計算に使う翻数を返す。
+        Mリーグでは場ゾロ2翻を含めて計算するため、
+        include_bazoro=True のときは +2 する。
+        """
+        han = hand.han
+        if hand.include_bazoro:
+            han += 2
+        return han
+
     @staticmethod
     def _calc_base_points(fu: int, han: int) -> int:
-
-        # 入力チェック
+        """
+        基本点を計算する。
+        han は「場ゾロ込み」の翻数で受け取る。
+        """
         if han <= 0:
-            raise ValueError("翻数は1以上")
+            raise ValueError("翻数は1以上で入力してください。")
         if fu <= 0:
-            raise ValueError("符は1以上")
+            raise ValueError("符は1以上で入力してください。")
 
-        # 満貫以上の処理
+        # 満貫以上の判定
+        # Mリーグ公式では、
+        # ・20符以上の7翻
+        # ・30符以上の6翻と7翻
+        # ・60符以上の5翻
+        # を満貫とする
         if han >= 13:
             return 8000  # 役満
         if han >= 11:
@@ -39,34 +56,37 @@ class MahjongScoreCalculator:
             return 4000  # 倍満
         if han >= 6:
             return 3000  # 跳満
-        if han == 5:
-            return 2000  # 満貫
 
-        # 特殊満貫
+        # 5翻は満貫
+        if han == 5:
+            return 2000
+
+        # 30符6翻は切り上げ満貫、という考え方は
+        # 上の han >= 6 に含まれる。
+        # 4翻以下は通常計算
+        # ただし一般的な満貫ラインも残しておく
         if han == 4 and fu >= 40:
             return 2000
         if han == 3 and fu >= 70:
             return 2000
 
-        # 通常計算
         return fu * (2 ** (han + 2))
 
-    # 実際の点数計算
     @classmethod
     def calculate_hand_score(cls, hand: HandInput) -> HandResult:
+        # 場ゾロ込み翻数を計算
+        effective_han = cls._effective_han(hand)
 
         # 基本点を計算
-        base_points = cls._calc_base_points(hand.fu, hand.han)
+        base_points = cls._calc_base_points(hand.fu, effective_han)
 
-        # ロンの場合
+        # ロン和了
         if hand.win_type == WinType.RON:
-
             if hand.winner_type == WinnerType.DEALER:
                 ron_points = cls._round_up_to_100(base_points * 6)
             else:
                 ron_points = cls._round_up_to_100(base_points * 4)
 
-            # 本場と供託を加算
             ron_points += hand.honba * 300
             ron_points += hand.kyotaku * 1000
 
@@ -76,11 +96,9 @@ class MahjongScoreCalculator:
                 rounded_points=ron_points,
             )
 
-        # ツモの場合
+        # ツモ和了
         if hand.winner_type == WinnerType.DEALER:
-
             payment_each = cls._round_up_to_100(base_points * 2)
-
             total = payment_each * 3 + hand.honba * 300 + hand.kyotaku * 1000
 
             return HandResult(
@@ -92,7 +110,6 @@ class MahjongScoreCalculator:
         # 子ツモ
         non_dealer_payment = cls._round_up_to_100(base_points * 1)
         dealer_payment = cls._round_up_to_100(base_points * 2)
-
         total = dealer_payment + non_dealer_payment * 2 + hand.honba * 300 + hand.kyotaku * 1000
 
         return HandResult(
@@ -103,10 +120,7 @@ class MahjongScoreCalculator:
         )
 
 
-# Mリーグのポイント計算
 class MLeaguePointCalculator:
-
-    # 順位点
     RANK_POINTS = {
         1: 50.0,
         2: 10.0,
@@ -116,28 +130,19 @@ class MLeaguePointCalculator:
 
     @classmethod
     def calculate(cls, score_input: MLeagueScoreInput) -> MLeagueScoreResult:
-
-        # 4人チェック
         if len(score_input.scores) != 4:
-            raise ValueError("4人分必要")
+            raise ValueError("4人分の素点を入力してください。")
 
-        # プレイヤー番号と点数をセットにする
         indexed_scores = list(enumerate(score_input.scores))
-
-        # 点数で並び替え（高い順）
         indexed_scores.sort(key=lambda x: x[1], reverse=True)
 
         players_result = [None] * 4
-
         current_rank = 1
 
         for sorted_index, (player_index, score) in enumerate(indexed_scores):
-
-            # 同点でない場合は順位更新
             if sorted_index > 0 and score < indexed_scores[sorted_index - 1][1]:
                 current_rank = sorted_index + 1
 
-            # ポイント計算
             point = (score - 30000) / 1000 + cls.RANK_POINTS[current_rank]
 
             players_result[player_index] = PlayerMLeagueResult(

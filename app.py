@@ -1,4 +1,5 @@
 import streamlit as st
+from typing import List
 
 from calculators import MahjongCalculator
 from models import HandInput, YAKU_MASTER

@@ -1,59 +1,60 @@
-# データをまとめるための便利な仕組み（クラスを簡単に書ける）
 from dataclasses import dataclass
+from typing import Dict, List
 
-# 選択肢（親/子など）を固定するための仕組み
-from enum import Enum
+@dataclass (frozen=True)
+class Yaku:
+    
+    #一つの役の情報を保持するクラス
+    name: str
+    han_closed: int
+    han_open: int
+    
+YAKU_MASTER: Dict[str, Yaku] = {
+    "立直": Yaku("立直", 1, 1),
+    "一発": Yaku("一発", 1, 0),
+    "門前清自摸和": Yaku("門前清自摸和", 1, 0),
+    "断么九": Yaku("断么九", 1, 1),
+    "一盃口": Yaku("一盃口", 1, 0),
+    "平和": Yaku("平和", 1, 0),
+    "自風牌": Yaku("自風牌", 1, 1),
+    "場風牌": Yaku("場風牌", 1, 1),
+    "役牌": Yaku("役牌", 1, 1),
+    "二盃口": Yaku("二盃口", 3, 0),
+    "三色同順": Yaku("三色同順", 2, 1),
+    "三色同刻": Yaku("三色同刻", 2, 2),
+    "三槓子": Yaku("三槓子", 2, 2),
+    "対々和": Yaku("対々和", 2, 2),
+    "三暗刻": Yaku("三暗刻", 2, 2),
+    "小三元": Yaku("小三元", 2, 2),
+    "混全帯么九": Yaku("混全帯么九", 2, 1),
+    "純全帯么九": Yaku("純全帯么九", 3, 2),
+    "混老頭": Yaku("混老頭", 2, 2),
+    "四暗刻": Yaku("四暗刻", 13, 13),
+    "国士無双": Yaku("国士無双", 13, 13),
+    "小四喜": Yaku("小四喜", 13, 13),
+    "大四喜": Yaku("大四喜", 13, 13),
+    "字一色": Yaku("字一色", 13, 13),
+    "清老頭": Yaku("清老頭", 13, 13),
+    "四槓子": Yaku("四槓子", 13, 13),
+    "九蓮宝燈": Yaku("九蓮宝燈", 13, 13),
+    "純正九蓮宝燈": Yaku("純正九蓮宝燈", 13, 13),
+    "国士無双十三面待ち": Yaku("国士無双十三面待ち", 13, 13),
+    "大三元": Yaku("大三元", 13, 13),
+    "清一色": Yaku("清一色", 6, 5),
+    "混一色": Yaku("混一色", 3, 2),
+}
 
-
-# 親か子かを表すクラス（Enum = 選択肢の集合）
-class WinnerType(str, Enum):
-    DEALER = "親"        # 親
-    NON_DEALER = "子"   # 子
-
-
-# ロンかツモかを表す
-class WinType(str, Enum):
-    RON = "ロン"        # ロン和了
-    TSUMO = "ツモ"      # ツモ和了
-
-
-# 入力データをまとめる箱
-@dataclass(frozen=True)  # frozen=True → 値を変更できない（安全）
+@dataclass
 class HandInput:
-    fu: int                 # 符
-    han: int                # 翻
-    winner_type: WinnerType # 親 or 子
-    win_type: WinType       # ロン or ツモ
-    honba: int = 0          # 本場（デフォルト0）
-    kyotaku: int = 0        # 供託（デフォルト0）
-
-
-# 計算結果をまとめる箱
-@dataclass(frozen=True)
-class HandResult:
-    base_points: int             # 基本点
-    total_points: str            # 表示用（例: 3900点）
-    rounded_points: int | None = None  # ロンの時の点数
-    dealer_payment: int | None = None  # 親の支払い
-    non_dealer_payment: int | None = None  # 子の支払い
-
-
-# 半荘終了時の入力
-@dataclass(frozen=True)
-class MLeagueScoreInput:
-    scores: list[int]  # 4人の点数
-    riichi_sticks_on_table: int = 0  # リーチ棒（今回は未使用）
-
-
-# 各プレイヤーの結果
-@dataclass(frozen=True)
-class PlayerMLeagueResult:
-    rank: int     # 順位
-    score: int    # 素点
-    point: float  # Mリーグポイント
-
-
-# 全体の結果
-@dataclass(frozen=True)
-class MLeagueScoreResult:
-    players: list[PlayerMLeagueResult]  # 4人分の結果
+    
+    #ユーザーからの入力を保持するクラス
+    selected_yaku: List[str]
+    ia_mentsu: List[str]
+    is_tsumo: bool
+    is_oya: bool
+    fu: int
+    honba: int = 0
+    riichi_sticks: int = 0
+    dors_count: int = 0
+    ura_dors_count: int = 0
+    aka_dors_count: int = 0

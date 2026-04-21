@@ -124,7 +124,7 @@ class MahjongCalculator:
                 result["label"] = f"親のツモ {payment}オール"
                 result["score"] = total
             else:
-                child_payment  self.round_up_to_100(base_points)
+                child_payment = self.round_up_to_100(base_points)
                 dealer_payment = self.round_up_to_100(base_points * 2)
                 total = (
                     child_payment * 2 + 

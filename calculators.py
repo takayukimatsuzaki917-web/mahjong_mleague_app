@@ -134,7 +134,8 @@ class MahjongCalculator:
                 )
                 result["label"] = f"子ツモ 子:{child_payment} / 親:{dealer_payment}"
                 result["score"] = total
-            else:
+        
+        else:
                 multiplier = 6 if hand.is_oya else 4
                 ron_score = self.round_up_to_100(base_points * multiplier)
                 total = ron_score + hand.honba * 300 + hand.riichi_sticks * 1000

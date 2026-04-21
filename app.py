@@ -30,7 +30,7 @@ def main() -> None:
         is_menzen = st.radio(
             "門前 or 副露",
             options = [True, False],
-            format_func = lambda x: "門前" if x else "副露"
+            format_func = lambda x: "門前" if x else "副露",
             horizontal = True,
         )
         

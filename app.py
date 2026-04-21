@@ -50,7 +50,7 @@ def main() -> None:
         )
         
         st.markdown("### 役の選択")
-        yaku_names = list(YakuMaster.keys())
+        yaku_names = list(YAKU_MASTER.keys())
         selected_yaku = st.multiselect(
             "役を選択してください", options=yaku_names,
             default = [],
@@ -69,9 +69,9 @@ def main() -> None:
         )   
         
         st.markdown("### ドラ")
-        dora_count = st.number_input("ドラ枚数", min_value=0, max_value=20, value=0, step=1)
-        uradora_count = st.number_input("裏ドラ枚数", min_value=0, max_value=20, value=0, step=1)
-        akadora_count = st.number_input("赤ドラ枚数", min_value=0, max_value=20, value=0, step=1)
+        dors_count = st.number_input("ドラ枚数", min_value=0, max_value=20, value=0, step=1)
+        ura_dors_count = st.number_input("裏ドラ枚数", min_value=0, max_value=20, value=0, step=1)
+        aka_dors_count = st.number_input("赤ドラ枚数", min_value=0, max_value=20, value=0, step=1)
 
         st.markdown("### 場況")
         honba = st.number_input("本場", min_value=0, max_value=20, value=0, step=1)
@@ -85,12 +85,12 @@ def main() -> None:
         fu=fu,
         honba=honba,
         riichi_sticks=riichi_sticks,
-        dora_count=dora_count,
-        uradora_count=uradora_count,
-        akadora_count=akadora_count,
+        dors_count=dors_count,
+        ura_dors_count=ura_dors_count,
+        aka_dors_count=aka_dors_count,
     )
 
-    errors = calculator.validate_hand(hand)
+    errors = calculators.validate_hand(hand)
 
     with col2:
         st.subheader("計算結果")
@@ -100,10 +100,10 @@ def main() -> None:
                 st.error(error)
             return
 
-        han_breakdown = calculator.calculate_han_breakdown(hand)
-        total_han = calculator.calculate_total_han(hand)
-        score_result = calculator.calculate_score(hand)
-        score_title = calculator.get_score_title(
+        han_breakdown = calculators.calculate_han_breakdown(hand)
+        total_han = calculators.calculate_total_han(hand)
+        score_result = calculators.calculate_score(hand)
+        score_title = calculators.get_score_title(
             han=score_result["han"],
             base_points=score_result["base_points"],
         )
@@ -135,9 +135,9 @@ def main() -> None:
         st.write(f"- 和了方法: {'ツモ' if hand.is_tsumo else 'ロン'}")
         st.write(f"- 親: {'親' if hand.is_oya else '子'}")
         st.write(f"- 選択役: {', '.join(hand.selected_yaku) if hand.selected_yaku else 'なし'}")
-        st.write(f"- ドラ: {hand.dora_count}")
-        st.write(f"- 裏ドラ: {hand.uradora_count}")
-        st.write(f"- 赤ドラ: {hand.akadora_count}")
+        st.write(f"- ドラ: {hand.dors_count}")
+        st.write(f"- 裏ドラ: {hand.ura_dors_count}")
+        st.write(f"- 赤ドラ: {hand.aka_dors_count}")
         st.write(f"- 本場: {hand.honba}")
         st.write(f"- 供託リーチ棒: {hand.riichi_sticks}")
 

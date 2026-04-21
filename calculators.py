@@ -15,16 +15,16 @@ class MahjongCalculator:
             if not yaku:
                 continue
             
-            han = yaku.han_closed if hand.is_menzen else yaku.han_open
+            han = yaku.han_closed if hand_input.is_menzen else yaku.han_open
             if han > 0:
                 breakdown[yaku_name] = han
             
-        if hand.dora_count > 0:
-            breakdown["ドラ"] = hand.dora_count
-        if hand.uradora_count > 0:
-            breakdown["裏ドラ"] = hand.uradora_count
-        if hand.akadara_count > 0:
-            breakdown["赤ドラ"] = hand.akadara_count
+        if hand_input.dors_count > 0:
+            breakdown["ドラ"] = hand_input.dors_count
+        if hand_input.ura_dors_count > 0:
+            breakdown["裏ドラ"] = hand_input.ura_dors_count
+        if hand_input.aka_dors_count > 0:
+            breakdown["赤ドラ"] = hand_input.aka_dors_count
             
         return breakdown
     
@@ -48,7 +48,7 @@ class MahjongCalculator:
         errors: List[str] = []
         
         if len(hand.selected_yaku) == 0 and (
-            hand.dora_count + hand.uradora_count + hand.akadara_count == 0
+            hand.dors_count + hand.ura_dors_count + hand.aka_dors_count == 0
             ):
             errors.append("役またはドラが選択されていません。")
         
@@ -58,7 +58,7 @@ class MahjongCalculator:
         closed_only_yaku = {
             "立直", "一発", "門前清自摸和", "一盃口", "二盃口","平和"
         }
-        if not hand.is_menzed:
+        if not hand.is_menzen:
             invalid_yaku = sorted(set(hannd.selected_yaku) & closed_only_yaku)
             if invalid_yaku:
                 errors.append(f"鳴きありの場合、以下の役は選択できません: {', '.join(invalid_yaku)}"
@@ -114,7 +114,7 @@ class MahjongCalculator:
     
         if total_han == 0:
             result["label"] = "役なし"
-            result["score"] = 0
+            result["total_points"] = 0
             return result
         
         if hand.is_tsumo:
@@ -122,7 +122,7 @@ class MahjongCalculator:
                 payment = self.round_up_to_100(base_points * 2)
                 total = payment * 3 + hand.honba * 300 + hand.riichi_sticks * 1000
                 result["label"] = f"親のツモ {payment}オール"
-                result["score"] = total
+                result["total_points"] = total
             else:
                 child_payment = self.round_up_to_100(base_points)
                 dealer_payment = self.round_up_to_100(base_points * 2)
@@ -133,7 +133,7 @@ class MahjongCalculator:
                     hand.riichi_sticks * 1000
                 )
                 result["label"] = f"子ツモ 子:{child_payment} / 親:{dealer_payment}"
-                result["score"] = total
+                result["total_points"] = total
         
         else:
                 multiplier = 6 if hand.is_oya else 4

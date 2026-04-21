@@ -49,8 +49,8 @@ class HandInput:
     
     #ユーザーからの入力を保持するクラス
     selected_yaku: List[str]
-    ia_mentsu: List[str]
     is_tsumo: bool
+    is_menzen: bool
     is_oya: bool
     fu: int
     honba: int = 0

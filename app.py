@@ -1,11 +1,11 @@
 import streamlit as st
 
-from calculator import MarkovChainCalculator
+from calculator import MahjongScoreCalculator
 from models import HandInput, YakuMaster
 
 st.set_page_config(page_title="麻雀点数計算アプリ", page_icon="🀄", layout="wide")
 
-calculator = MarkovChainCalculator()
+calculator = MahjongScoreCalculator()
 
 def get_fu_options(selected_yaku: List[str]) -> List[int]:
     

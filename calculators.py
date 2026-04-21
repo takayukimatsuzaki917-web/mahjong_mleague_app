@@ -104,7 +104,7 @@ class MahjongCalculator:
         fu = hand.fu
         base_points = self.calculate_base_points(fu, total_han)
     
-    result: Dict[str, int | str] = {
+        result: Dict[str, int | str] = {
         "han": total_han,
         "fu": fu,
         "base_points": base_points,

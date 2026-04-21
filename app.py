@@ -1,7 +1,7 @@
 import streamlit as st
 
 from calculators import MahjongCalculator
-from models import HandInput, YakuMaster
+from models import HandInput, YAKU_MASTER
 
 st.set_page_config(page_title="麻雀点数計算アプリ", page_icon="🀄", layout="wide")
 

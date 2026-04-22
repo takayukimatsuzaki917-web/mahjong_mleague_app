@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-streamlit>=1.30
-=======
 streamlit
-streamlit>=1.30>>>>>>> 7282adc (Dockerfileとrequirements.txtを追加し、Streamlitアプリの環境を構築)
+pandas
+numpy

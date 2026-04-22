@@ -59,7 +59,7 @@ class MahjongCalculator:
             "立直", "一発", "門前清自摸和", "一盃口", "二盃口","平和"
         }
         if not hand.is_menzen:
-            invalid_yaku = sorted(set(hannd.selected_yaku) & closed_only_yaku)
+            invalid_yaku = sorted(set(hand.selected_yaku) & closed_only_yaku)
             if invalid_yaku:
                 errors.append(f"鳴きありの場合、以下の役は選択できません: {', '.join(invalid_yaku)}"
                               )
